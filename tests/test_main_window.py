@@ -53,6 +53,47 @@ class TestMainWindow(unittest.TestCase):
         self.assertTrue(self.root.resizable()[0])
         self.assertTrue(self.root.resizable()[1])
 
+    def test_task_input_field_exists(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        self.assertIsNotNone(window.task_entry)
+        self.assertEqual(window.task_entry.winfo_class(), "Entry")
+
+    def test_start_button_exists(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        self.assertIsNotNone(window.start_button)
+        self.assertEqual(window.start_button.winfo_class(), "Button")
+        self.assertEqual(window.start_button["text"], "▶ 開始")
+
+    def test_task_input_accepts_text(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "テストタスク")
+        self.assertEqual(window.task_entry.get(), "テストタスク")
+
+    def test_start_button_clickable(self):
+        from src.gui.main_window import MainWindow
+        from unittest.mock import MagicMock
+
+        window = MainWindow(self.root)
+        mock_callback = MagicMock()
+        window.start_button.configure(command=mock_callback)
+        window.start_button.invoke()
+        mock_callback.assert_called_once()
+
+    def test_widgets_packed_correctly(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        children = list(self.root.children.values())
+        self.assertGreater(len(children), 0)
+        self.assertIn(window.task_entry, children)
+        self.assertIn(window.start_button, children)
+
 
 if __name__ == "__main__":
     unittest.main()
