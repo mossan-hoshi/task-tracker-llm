@@ -121,6 +121,35 @@ class TestSessionManager(unittest.TestCase):
         self.assertGreaterEqual(total_time, 0.2)
         self.assertLess(total_time, 1.0)
 
+    def test_stop_all_sessions(self):
+        from src.session_manager import SessionManager
+
+        manager = SessionManager()
+        manager.start_session("タスク1")
+        manager.start_session("タスク2")
+        manager.start_session("タスク3")
+
+        self.assertEqual(len(manager.get_completed_sessions()), 2)
+        self.assertIsNotNone(manager.current_session)
+        self.assertTrue(manager.current_session.is_running)
+
+        manager.stop_all_sessions()
+
+        self.assertEqual(len(manager.get_completed_sessions()), 3)
+        self.assertIsNone(manager.current_session)
+        for session in manager.sessions:
+            self.assertFalse(session.is_running)
+            self.assertIsNotNone(session.end_time)
+
+    def test_stop_all_sessions_when_no_sessions(self):
+        from src.session_manager import SessionManager
+
+        manager = SessionManager()
+        manager.stop_all_sessions()
+
+        self.assertEqual(len(manager.sessions), 0)
+        self.assertIsNone(manager.current_session)
+
 
 if __name__ == "__main__":
     unittest.main()

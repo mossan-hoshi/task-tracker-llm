@@ -301,6 +301,95 @@ class TestMainWindow(unittest.TestCase):
         window._update_display()
         self.assertIsNone(window._timer_id)
 
+    def test_stop_button_exists(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        self.assertIsNotNone(window.stop_button)
+        self.assertEqual(window.stop_button.winfo_class(), "Button")
+        self.assertEqual(window.stop_button["text"], "⏹ 停止")
+
+    def test_stop_button_stops_all_sessions(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "タスク1")
+        window._on_start_clicked()
+        
+        window.task_entry.insert(0, "タスク2")
+        window._on_start_clicked()
+
+        window._on_stop_clicked()
+
+        self.assertEqual(len(window.session_manager.get_completed_sessions()), 2)
+        self.assertIsNone(window.session_manager.current_session)
+
+    def test_stop_button_stops_real_time_timer(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "タイマー停止テスト")
+        window._on_start_clicked()
+        
+        self.assertIsNotNone(window._timer_id)
+        
+        window._on_stop_clicked()
+        
+        self.assertIsNone(window._timer_id)
+
+    def test_stop_button_shows_summary_view(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "サマリーテスト")
+        window._on_start_clicked()
+
+        window._on_stop_clicked()
+
+        self.assertTrue(window._is_summary_view)
+
+    def test_summary_view_widgets_exist(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "サマリーウィジェットテスト")
+        window._on_start_clicked()
+
+        window._on_stop_clicked()
+
+        self.assertIsNotNone(window.summary_label)
+        self.assertIsNotNone(window.back_button)
+        self.assertEqual(window.back_button["text"], "戻る")
+
+    def test_back_button_returns_to_main_view(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "戻るボタンテスト")
+        window._on_start_clicked()
+
+        window._on_stop_clicked()
+        self.assertTrue(window._is_summary_view)
+
+        window._on_back_clicked()
+
+        self.assertFalse(window._is_summary_view)
+
+    def test_summary_view_displays_session_data(self):
+        from src.gui.main_window import MainWindow
+        import time
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "データ表示テスト")
+        window._on_start_clicked()
+        time.sleep(0.1)
+
+        window._on_stop_clicked()
+
+        summary_text = window.summary_label.cget("text")
+        self.assertIn("データ表示テスト", summary_text)
+        self.assertRegex(summary_text, r"\d{2}:\d{2}:\d{2}")
+
 
 if __name__ == "__main__":
     unittest.main()

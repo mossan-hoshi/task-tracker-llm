@@ -7,8 +7,10 @@ class MainWindow:
         self.root = root
         self.session_manager = SessionManager()
         self._timer_id = None
+        self._is_summary_view = False
         self._setup_window()
         self._create_widgets()
+        self._create_summary_widgets()
 
     def _setup_window(self):
         self.root.title("Task Tracker")
@@ -24,6 +26,9 @@ class MainWindow:
 
         self.pause_button = tk.Button(self.root, text="⏸ 一時停止", command=self._on_pause_clicked, state="disabled")
         self.pause_button.pack(pady=5)
+
+        self.stop_button = tk.Button(self.root, text="⏹ 停止", command=self._on_stop_clicked)
+        self.stop_button.pack(pady=5)
 
         self.task_list = tk.Listbox(self.root, width=80, height=15)
         self.task_list.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
@@ -87,6 +92,64 @@ class MainWindow:
             self._timer_id = self.root.after(1000, self._update_display)
         else:
             self._timer_id = None
+
+    def _on_stop_clicked(self):
+        if self._timer_id:
+            self.root.after_cancel(self._timer_id)
+            self._timer_id = None
+        
+        self.session_manager.stop_all_sessions()
+        self._show_summary_view()
+
+    def _create_summary_widgets(self):
+        self.summary_label = tk.Label(self.root, text="", justify=tk.LEFT, anchor="nw")
+        self.back_button = tk.Button(self.root, text="戻る", command=self._on_back_clicked)
+
+    def _show_summary_view(self):
+        self._is_summary_view = True
+        
+        self.task_entry.pack_forget()
+        self.start_button.pack_forget()
+        self.pause_button.pack_forget()
+        self.stop_button.pack_forget()
+        self.task_list.pack_forget()
+        
+        summary_text = self._generate_summary_text()
+        self.summary_label.config(text=summary_text)
+        self.summary_label.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+        self.back_button.pack(pady=10)
+
+    def _show_main_view(self):
+        self._is_summary_view = False
+        
+        self.summary_label.pack_forget()
+        self.back_button.pack_forget()
+        
+        self.task_entry.pack(pady=10)
+        self.start_button.pack(pady=5)
+        self.pause_button.pack(pady=5)
+        self.stop_button.pack(pady=5)
+        self.task_list.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+
+    def _on_back_clicked(self):
+        self._show_main_view()
+
+    def _generate_summary_text(self):
+        if not self.session_manager.sessions:
+            return "セッションがありません。"
+        
+        summary_lines = ["作業セッション一覧:\n"]
+        for i, session in enumerate(self.session_manager.sessions, 1):
+            summary_lines.append(f"{i}. {session.task_name}: {session.format_duration()}")
+        
+        total_time = self.session_manager.get_total_time()
+        hours = int(total_time // 3600)
+        minutes = int((total_time % 3600) // 60)
+        seconds = int(total_time % 60)
+        total_formatted = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        
+        summary_lines.append(f"\n合計時間: {total_formatted}")
+        return "\n".join(summary_lines)
 
     def start(self):
         self.root.mainloop()

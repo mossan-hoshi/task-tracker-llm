@@ -30,3 +30,8 @@ class SessionManager:
 
     def get_total_time(self) -> float:
         return sum(session.get_duration() for session in self.sessions)
+
+    def stop_all_sessions(self) -> None:
+        if self.current_session and self.current_session.is_running:
+            self.current_session.stop()
+        self.current_session = None
