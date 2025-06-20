@@ -35,10 +35,10 @@
 
 ```bash
 # テストの実行
-uv run python -m unittest discover tests -v
+source .venv/bin/activate && python -m pytest tests/ -v
 
 # アプリケーションの起動（main.py実装後）
-uv run python main.py
+source .venv/bin/activate && python main.py
 ```
 
 ## 利用手順
@@ -70,14 +70,17 @@ uv run python main.py
 
 ```bash
 # テスト実行
-uv run python -m unittest discover tests -v
+source .venv/bin/activate && python -m pytest tests/ -v
+
+# テストカバレッジ付き実行
+source .venv/bin/activate && python -m pytest tests/ --cov=src
 
 # コードフォーマット
-uv run black .
+source .venv/bin/activate && black .
 
 # 静的解析
-uv run flake8 .
-uv run mypy .
+source .venv/bin/activate && flake8 .
+source .venv/bin/activate && mypy .
 
 # 依存関係追加
 uv add <package-name>
@@ -146,7 +149,7 @@ uv add --dev <package-name>
 | 5 | **⏸ 一時停止／再開** ボタン実装 | パウズ中に時間が増えない | ✅ |
 | 6 | 作業一覧リスト (Listbox または Treeview) にタスクと経過時間をリアルタイム表示 | 秒単位で時間が更新される | ✅ |
 | 7 | **⏹ 停止** ボタンで全セッションを終了し、サマリービューに遷移 | タイマーが止まることを確認 | ✅ |
-| 8 | 記録済みセッションを Markdown 文字列へ整形 | 期待形式の文字列が得られる | 🔳 |
+| 8 | 記録済みセッションを Markdown 文字列へ整形 | 期待形式の文字列が得られる | ✅ |
 | 9 | クリップボードに Markdown をコピーするユーティリティ | 他アプリへ貼り付け可能 | 🔳 |
 |10 | Gemini API 呼び出しスタブ (モック) を実装 | スタブが固定レスポンスを返す | 🔳 |
 |11 | 実 API 呼び出しロジックへ差し替えし、分類結果を受信 | ターミナルでレスポンスが確認できる | 🔳 |

@@ -27,19 +27,19 @@ uv add pytest pytest-cov google-generativeai
 uv sync
 
 # Run tests (primary development command)
-uv run pytest
+source .venv/bin/activate && python -m pytest tests/ -v
 
 # Run tests with coverage
-uv run pytest --cov=src
+source .venv/bin/activate && python -m pytest tests/ --cov=src
 
 # Run specific test file
-uv run pytest tests/test_session.py
+source .venv/bin/activate && python -m pytest tests/test_session.py -v
 
 # Run tests in watch mode (if pytest-watch is installed)
 uv run ptw
 
 # Run the application (once main.py exists)
-uv run python main.py
+source .venv/bin/activate && python main.py
 
 # Type checking (once mypy is configured)
 uv run mypy .
