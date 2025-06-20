@@ -1,11 +1,15 @@
 import tkinter as tk
 from src.session_manager import SessionManager
+from src.utils.clipboard import ClipboardManager
+from src.utils.markdown import MarkdownExporter
 
 
 class MainWindow:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.session_manager = SessionManager()
+        self.clipboard_manager = ClipboardManager()
+        self.markdown_exporter = MarkdownExporter()
         self._timer_id = None
         self._is_summary_view = False
         self._setup_window()
@@ -103,6 +107,7 @@ class MainWindow:
 
     def _create_summary_widgets(self):
         self.summary_label = tk.Label(self.root, text="", justify=tk.LEFT, anchor="nw")
+        self.copy_button = tk.Button(self.root, text="Copy Markdown", command=self._on_copy_markdown_clicked)
         self.back_button = tk.Button(self.root, text="戻る", command=self._on_back_clicked)
 
     def _show_summary_view(self):
@@ -117,12 +122,14 @@ class MainWindow:
         summary_text = self._generate_summary_text()
         self.summary_label.config(text=summary_text)
         self.summary_label.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+        self.copy_button.pack(pady=5)
         self.back_button.pack(pady=10)
 
     def _show_main_view(self):
         self._is_summary_view = False
         
         self.summary_label.pack_forget()
+        self.copy_button.pack_forget()
         self.back_button.pack_forget()
         
         self.task_entry.pack(pady=10)
@@ -133,6 +140,18 @@ class MainWindow:
 
     def _on_back_clicked(self):
         self._show_main_view()
+
+    def _on_copy_markdown_clicked(self):
+        markdown_text = self.markdown_exporter.export_sessions(self.session_manager.get_all_sessions())
+        
+        if self.clipboard_manager.copy_to_clipboard(markdown_text):
+            original_text = self.copy_button.cget("text")
+            self.copy_button.config(text="✓ コピー完了!")
+            self.root.after(2000, lambda: self.copy_button.config(text=original_text))
+        else:
+            original_text = self.copy_button.cget("text")
+            self.copy_button.config(text="✗ コピー失敗")
+            self.root.after(2000, lambda: self.copy_button.config(text=original_text))
 
     def _generate_summary_text(self):
         if not self.session_manager.sessions:

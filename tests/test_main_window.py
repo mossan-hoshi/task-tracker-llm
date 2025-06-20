@@ -390,6 +390,67 @@ class TestMainWindow(unittest.TestCase):
         self.assertIn("データ表示テスト", summary_text)
         self.assertRegex(summary_text, r"\d{2}:\d{2}:\d{2}")
 
+    def test_copy_markdown_button_exists(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "コピーボタンテスト")
+        window._on_start_clicked()
+        window._on_stop_clicked()
+
+        self.assertIsNotNone(window.copy_button)
+        self.assertEqual(window.copy_button["text"], "Copy Markdown")
+
+    def test_copy_markdown_button_copies_to_clipboard(self):
+        from src.gui.main_window import MainWindow
+        from unittest.mock import patch
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "クリップボードテスト")
+        window._on_start_clicked()
+        window._on_stop_clicked()
+
+        with patch.object(window.clipboard_manager, 'copy_to_clipboard', return_value=True) as mock_copy:
+            window._on_copy_markdown_clicked()
+            mock_copy.assert_called_once()
+            args = mock_copy.call_args[0]
+            self.assertIn("クリップボードテスト", args[0])
+            self.assertIn("# 作業セッション記録", args[0])
+
+    def test_copy_markdown_button_shows_feedback_on_success(self):
+        from src.gui.main_window import MainWindow
+        from unittest.mock import patch
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "成功フィードバックテスト")
+        window._on_start_clicked()
+        window._on_stop_clicked()
+
+        with patch.object(window.clipboard_manager, 'copy_to_clipboard', return_value=True):
+            with patch.object(window.copy_button, 'config') as mock_config:
+                window._on_copy_markdown_clicked()
+                
+                mock_config.assert_called()
+                call_args = [call[1] for call in mock_config.call_args_list]
+                self.assertTrue(any('text' in kwargs and 'コピー完了' in str(kwargs.get('text', '')) for kwargs in call_args))
+
+    def test_copy_markdown_button_shows_feedback_on_failure(self):
+        from src.gui.main_window import MainWindow
+        from unittest.mock import patch
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "失敗フィードバックテスト")
+        window._on_start_clicked()
+        window._on_stop_clicked()
+
+        with patch.object(window.clipboard_manager, 'copy_to_clipboard', return_value=False):
+            with patch.object(window.copy_button, 'config') as mock_config:
+                window._on_copy_markdown_clicked()
+                
+                mock_config.assert_called()
+                call_args = [call[1] for call in mock_config.call_args_list]
+                self.assertTrue(any('text' in kwargs and 'コピー失敗' in str(kwargs.get('text', '')) for kwargs in call_args))
+
 
 if __name__ == "__main__":
     unittest.main()
