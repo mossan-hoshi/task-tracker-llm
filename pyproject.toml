@@ -9,3 +9,27 @@ dependencies = [
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
 ]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "flake8>=7.3.0",
+    "mypy>=1.16.1",
+    "pep8-naming>=0.15.1",
+    "pre-commit>=4.2.0",
+]
+
+[tool.black]
+line-length = 120
+target-version = ["py312"]
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = ["E203"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true

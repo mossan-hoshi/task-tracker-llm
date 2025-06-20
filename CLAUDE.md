@@ -44,9 +44,14 @@ uv run python main.py
 # Type checking (once mypy is configured)
 uv run mypy .
 
-# Linting (if configured)
-uv run ruff check .
-uv run ruff format .
+# Code quality tools
+uv run black .
+uv run flake8 .
+uv run mypy .
+
+# Pre-commit hooks
+uv run pre-commit run --all-files
+uv run pre-commit install
 
 # Add new dependencies
 uv add <package_name>
@@ -68,7 +73,7 @@ Based on the README specification, the application follows this structure:
 
 ### Key Data Flow
 1. User enters task name → Session starts/switches automatically
-2. Real-time timer updates (1-second intervals) 
+2. Real-time timer updates (1-second intervals)
 3. Stop button → API categorization → Summary view
 4. Markdown generation → Clipboard export
 
@@ -114,7 +119,7 @@ uv.lock                  # Locked dependency versions
 
 **Red-Green-Refactor Cycle:**
 1. Write failing test first (Red)
-2. Write minimal code to pass test (Green) 
+2. Write minimal code to pass test (Green)
 3. Refactor while keeping tests green
 
 **Test Structure:**
