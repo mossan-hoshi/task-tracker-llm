@@ -22,13 +22,13 @@ class TestMainWindow(unittest.TestCase):
     def test_window_title(self):
         from src.gui.main_window import MainWindow
 
-        _window = MainWindow(self.root)
+        MainWindow(self.root)
         self.assertEqual(self.root.title(), "Task Tracker")
 
     def test_window_geometry(self):
         from src.gui.main_window import MainWindow
 
-        _window = MainWindow(self.root)
+        MainWindow(self.root)
         geometry = self.root.geometry()
         self.assertIsNotNone(geometry)
         self.assertEqual(self.root.title(), "Task Tracker")
@@ -49,7 +49,7 @@ class TestMainWindow(unittest.TestCase):
     def test_window_resizable(self):
         from src.gui.main_window import MainWindow
 
-        _window = MainWindow(self.root)
+        MainWindow(self.root)
         self.assertTrue(self.root.resizable()[0])
         self.assertTrue(self.root.resizable()[1])
 
@@ -139,6 +139,67 @@ class TestMainWindow(unittest.TestCase):
         self.assertTrue(second_session.is_running)
         self.assertEqual(second_session.task_name, "タスク2")
         self.assertIsNotNone(first_session.end_time)
+
+    def test_pause_button_exists(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        self.assertIsNotNone(window.pause_button)
+        self.assertEqual(window.pause_button.winfo_class(), "Button")
+        self.assertEqual(window.pause_button["text"], "⏸ 一時停止")
+
+    def test_pause_button_disabled_when_no_session(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        self.assertEqual(window.pause_button["state"], "disabled")
+
+    def test_pause_button_enabled_when_session_running(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "テストタスク")
+        window._on_start_clicked()
+
+        self.assertEqual(window.pause_button["state"], "normal")
+
+    def test_pause_button_pauses_current_session(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "テストタスク")
+        window._on_start_clicked()
+        session = window.session_manager.current_session
+
+        window._on_pause_clicked()
+
+        self.assertTrue(session.is_paused)
+        self.assertEqual(window.pause_button["text"], "▶ 再開")
+
+    def test_resume_button_resumes_current_session(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "テストタスク")
+        window._on_start_clicked()
+        session = window.session_manager.current_session
+
+        window._on_pause_clicked()
+        window._on_pause_clicked()
+
+        self.assertFalse(session.is_paused)
+        self.assertEqual(window.pause_button["text"], "⏸ 一時停止")
+
+    def test_pause_button_disabled_when_no_current_session(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "テストタスク")
+        window._on_start_clicked()
+        window.session_manager.stop_current_session()
+
+        window._update_button_states()
+        self.assertEqual(window.pause_button["state"], "disabled")
 
 
 if __name__ == "__main__":
