@@ -1,12 +1,11 @@
 import tkinter as tk
-from src.session import Session
-from typing import Optional
+from src.session_manager import SessionManager
 
 
 class MainWindow:
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.current_session: Optional[Session] = None
+        self.session_manager = SessionManager()
         self._setup_window()
         self._create_widgets()
 
@@ -27,11 +26,7 @@ class MainWindow:
         if not task_name:
             return
 
-        if self.current_session:
-            self.current_session.stop()
-
-        self.current_session = Session(task_name)
-        self.current_session.start()
+        self.session_manager.start_session(task_name)
         self.task_entry.delete(0, tk.END)
 
     def start(self):
