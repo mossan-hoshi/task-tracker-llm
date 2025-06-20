@@ -94,6 +94,46 @@ class TestMainWindow(unittest.TestCase):
         self.assertIn(window.task_entry, children)
         self.assertIn(window.start_button, children)
 
+    def test_session_integration(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        self.assertIsNone(window.current_session)
+
+        window.task_entry.insert(0, "テストタスク")
+        window._on_start_clicked()
+
+        self.assertIsNotNone(window.current_session)
+        self.assertEqual(window.current_session.task_name, "テストタスク")
+        self.assertTrue(window.current_session.is_running)
+        self.assertEqual(window.task_entry.get(), "")
+
+    def test_empty_task_name_ignored(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "   ")
+        window._on_start_clicked()
+
+        self.assertIsNone(window.current_session)
+
+    def test_session_switching(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+
+        window.task_entry.insert(0, "タスク1")
+        window._on_start_clicked()
+        first_session = window.current_session
+
+        window.task_entry.insert(0, "タスク2")
+        window._on_start_clicked()
+        second_session = window.current_session
+
+        self.assertFalse(first_session.is_running)
+        self.assertTrue(second_session.is_running)
+        self.assertEqual(second_session.task_name, "タスク2")
+
 
 if __name__ == "__main__":
     unittest.main()
