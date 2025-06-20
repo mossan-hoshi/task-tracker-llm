@@ -1,5 +1,11 @@
+import tkinter as tk
+from src.gui.main_window import MainWindow
+
+
 def main():
-    print("Hello from task-tracker-llm!")
+    root = tk.Tk()
+    app = MainWindow(root)
+    app.start()
 
 
 if __name__ == "__main__":
