@@ -18,7 +18,7 @@ repos:
     hooks:
       - id: flake8
         additional_dependencies: [pep8-naming]
-        args: [--max-line-length=120, --extend-ignore=E203,F841]
+        args: [--max-line-length=120, --extend-ignore=E203]
         exclude: ^\.venv/
 
   - repo: https://github.com/pre-commit/mirrors-mypy
