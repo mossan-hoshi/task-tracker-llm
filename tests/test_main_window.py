@@ -201,6 +201,106 @@ class TestMainWindow(unittest.TestCase):
         window._update_button_states()
         self.assertEqual(window.pause_button["state"], "disabled")
 
+    def test_task_list_exists(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        self.assertIsNotNone(window.task_list)
+        self.assertEqual(window.task_list.winfo_class(), "Listbox")
+
+    def test_task_list_displays_sessions(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "タスク1")
+        window._on_start_clicked()
+        
+        window.task_entry.insert(0, "タスク2")
+        window._on_start_clicked()
+
+        window._update_task_list()
+        
+        self.assertEqual(window.task_list.size(), 2)
+        items = [window.task_list.get(i) for i in range(window.task_list.size())]
+        self.assertTrue(any("タスク1" in item for item in items))
+        self.assertTrue(any("タスク2" in item for item in items))
+
+    def test_task_list_shows_running_status(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "実行中タスク")
+        window._on_start_clicked()
+
+        window._update_task_list()
+        
+        running_item = window.task_list.get(0)
+        self.assertIn("▶", running_item)
+        self.assertIn("実行中タスク", running_item)
+
+    def test_task_list_shows_paused_status(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "一時停止タスク")
+        window._on_start_clicked()
+        window._on_pause_clicked()
+
+        window._update_task_list()
+        
+        paused_item = window.task_list.get(0)
+        self.assertIn("⏸", paused_item)
+        self.assertIn("一時停止タスク", paused_item)
+
+    def test_task_list_shows_completed_status(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "完了タスク")
+        window._on_start_clicked()
+        window.session_manager.stop_current_session()
+
+        window._update_task_list()
+        
+        completed_item = window.task_list.get(0)
+        self.assertNotIn("▶", completed_item)
+        self.assertNotIn("⏸", completed_item)
+        self.assertIn("完了タスク", completed_item)
+
+    def test_task_list_shows_duration(self):
+        from src.gui.main_window import MainWindow
+        import time
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "時間表示テスト")
+        window._on_start_clicked()
+        time.sleep(0.1)
+
+        window._update_task_list()
+        
+        item_text = window.task_list.get(0)
+        self.assertRegex(item_text, r"\d{2}:\d{2}:\d{2}")
+
+    def test_real_time_update_timer_starts(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "リアルタイム更新テスト")
+        window._on_start_clicked()
+
+        self.assertIsNotNone(window._timer_id)
+
+    def test_real_time_update_timer_stops_when_no_running_sessions(self):
+        from src.gui.main_window import MainWindow
+
+        window = MainWindow(self.root)
+        window.task_entry.insert(0, "タイマー停止テスト")
+        window._on_start_clicked()
+        window.session_manager.stop_current_session()
+
+        window._update_display()
+        self.assertIsNone(window._timer_id)
+
 
 if __name__ == "__main__":
     unittest.main()
