@@ -1,27 +1,36 @@
 import tkinter as tk
+from typing import Optional
 from src.session_manager import SessionManager
 from src.utils.clipboard import ClipboardManager
 from src.utils.markdown import MarkdownExporter
 
 
 class MainWindow:
-    def __init__(self, root: tk.Tk):
-        self.root = root
-        self.session_manager = SessionManager()
-        self.clipboard_manager = ClipboardManager()
-        self.markdown_exporter = MarkdownExporter()
-        self._timer_id = None
-        self._is_summary_view = False
+    def __init__(self, root: tk.Tk) -> None:
+        self.root: tk.Tk = root
+        self.session_manager: SessionManager = SessionManager()
+        self.clipboard_manager: ClipboardManager = ClipboardManager()
+        self.markdown_exporter: MarkdownExporter = MarkdownExporter()
+        self._timer_id: Optional[str] = None
+        self._is_summary_view: bool = False
+        self.task_entry: tk.Entry
+        self.start_button: tk.Button
+        self.pause_button: tk.Button
+        self.stop_button: tk.Button
+        self.task_list: tk.Listbox
+        self.summary_label: tk.Label
+        self.copy_button: tk.Button
+        self.back_button: tk.Button
         self._setup_window()
         self._create_widgets()
         self._create_summary_widgets()
 
-    def _setup_window(self):
+    def _setup_window(self) -> None:
         self.root.title("Task Tracker")
         self.root.geometry("800x600")
         self.root.resizable(True, True)
 
-    def _create_widgets(self):
+    def _create_widgets(self) -> None:
         self.task_entry = tk.Entry(self.root, width=40)
         self.task_entry.pack(pady=10)
 
@@ -37,7 +46,7 @@ class MainWindow:
         self.task_list = tk.Listbox(self.root, width=80, height=15)
         self.task_list.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
-    def _on_start_clicked(self):
+    def _on_start_clicked(self) -> None:
         task_name = self.task_entry.get().strip()
         if not task_name:
             return
@@ -48,7 +57,7 @@ class MainWindow:
         self._update_task_list()
         self._start_real_time_updates()
 
-    def _on_pause_clicked(self):
+    def _on_pause_clicked(self) -> None:
         if not self.session_manager.current_session:
             return
 
@@ -62,13 +71,13 @@ class MainWindow:
         
         self._update_task_list()
 
-    def _update_button_states(self):
+    def _update_button_states(self) -> None:
         if self.session_manager.current_session and self.session_manager.current_session.is_running:
             self.pause_button.config(state="normal")
         else:
             self.pause_button.config(state="disabled")
 
-    def _update_task_list(self):
+    def _update_task_list(self) -> None:
         self.task_list.delete(0, tk.END)
         
         for session in self.session_manager.get_all_sessions():
@@ -82,13 +91,13 @@ class MainWindow:
             item_text = f"{status_icon} {session.task_name}: {session.format_duration()}"
             self.task_list.insert(tk.END, item_text)
 
-    def _start_real_time_updates(self):
+    def _start_real_time_updates(self) -> None:
         if self._timer_id:
             self.root.after_cancel(self._timer_id)
         
         self._timer_id = self.root.after(1000, self._update_display)
 
-    def _update_display(self):
+    def _update_display(self) -> None:
         self._update_task_list()
         
         has_running_sessions = any(session.is_running for session in self.session_manager.get_all_sessions())
@@ -97,7 +106,7 @@ class MainWindow:
         else:
             self._timer_id = None
 
-    def _on_stop_clicked(self):
+    def _on_stop_clicked(self) -> None:
         if self._timer_id:
             self.root.after_cancel(self._timer_id)
             self._timer_id = None
@@ -105,12 +114,12 @@ class MainWindow:
         self.session_manager.stop_all_sessions()
         self._show_summary_view()
 
-    def _create_summary_widgets(self):
+    def _create_summary_widgets(self) -> None:
         self.summary_label = tk.Label(self.root, text="", justify=tk.LEFT, anchor="nw")
         self.copy_button = tk.Button(self.root, text="Copy Markdown", command=self._on_copy_markdown_clicked)
         self.back_button = tk.Button(self.root, text="戻る", command=self._on_back_clicked)
 
-    def _show_summary_view(self):
+    def _show_summary_view(self) -> None:
         self._is_summary_view = True
         
         self.task_entry.pack_forget()
@@ -125,7 +134,7 @@ class MainWindow:
         self.copy_button.pack(pady=5)
         self.back_button.pack(pady=10)
 
-    def _show_main_view(self):
+    def _show_main_view(self) -> None:
         self._is_summary_view = False
         
         self.summary_label.pack_forget()
@@ -138,10 +147,10 @@ class MainWindow:
         self.stop_button.pack(pady=5)
         self.task_list.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
-    def _on_back_clicked(self):
+    def _on_back_clicked(self) -> None:
         self._show_main_view()
 
-    def _on_copy_markdown_clicked(self):
+    def _on_copy_markdown_clicked(self) -> None:
         markdown_text = self.markdown_exporter.export_sessions(self.session_manager.get_all_sessions())
         
         if self.clipboard_manager.copy_to_clipboard(markdown_text):
@@ -153,7 +162,7 @@ class MainWindow:
             self.copy_button.config(text="✗ コピー失敗")
             self.root.after(2000, lambda: self.copy_button.config(text=original_text))
 
-    def _generate_summary_text(self):
+    def _generate_summary_text(self) -> str:
         if not self.session_manager.sessions:
             return "セッションがありません。"
         
@@ -170,5 +179,6 @@ class MainWindow:
         summary_lines.append(f"\n合計時間: {total_formatted}")
         return "\n".join(summary_lines)
 
-    def start(self):
+    def start(self) -> None:
         self.root.mainloop()
+

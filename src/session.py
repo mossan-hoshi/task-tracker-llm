@@ -3,14 +3,14 @@ from typing import Optional
 
 
 class Session:
-    def __init__(self, task_name: str):
-        self.task_name = task_name
+    def __init__(self, task_name: str) -> None:
+        self.task_name: str = task_name
         self.start_time: Optional[datetime] = None
         self.end_time: Optional[datetime] = None
-        self.is_running = False
-        self.is_paused = False
+        self.is_running: bool = False
+        self.is_paused: bool = False
         self.pause_time: Optional[datetime] = None
-        self.total_pause_duration = 0.0
+        self.total_pause_duration: float = 0.0
 
     def start(self) -> None:
         if self.is_running:

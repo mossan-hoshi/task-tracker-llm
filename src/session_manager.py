@@ -3,7 +3,7 @@ from src.session import Session
 
 
 class SessionManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self.sessions: List[Session] = []
         self.current_session: Optional[Session] = None
 

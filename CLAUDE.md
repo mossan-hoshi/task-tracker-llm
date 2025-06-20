@@ -90,6 +90,13 @@ Based on the README specification, the application follows this structure:
 - No file persistence - all data exists in memory until export
 - Japanese text support required for task names and UI elements
 
+## Code Style Guidelines
+
+- **Type hints**: Use specific type hints extensively, avoid `Any` whenever possible
+- **Comments**: Only NOTE/TODO comments allowed, no other comments or docstrings
+- **Line length**: 120 characters maximum
+- **No explanatory comments**: Code should be self-documenting through clear naming
+
 ## Project Structure
 
 Expected directory structure (to be created during development):
